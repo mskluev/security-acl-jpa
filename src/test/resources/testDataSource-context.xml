@@ -14,12 +14,12 @@
 	<bean id="org.h2.tools.Server" class="org.h2.tools.Server" scope="singleton"
 		factory-method="createTcpServer" init-method="start"
 		depends-on="org.h2.tools.Server-WebServer">
-		<constructor-arg value="-tcp,-tcpAllowOthers,true,-tcpPort,9092" />
+		<constructor-arg value="-tcp,-tcpAllowOthers,-tcpPort,9092" />
 	</bean>
 
 	<bean id="org.h2.tools.Server-WebServer" class="org.h2.tools.Server"
 		scope="singleton" factory-method="createWebServer" init-method="start">
-		<constructor-arg value="-web,-webAllowOthers,true,-webPort,8082" />
+		<constructor-arg value="-web,-webAllowOthers,-webPort,8082" />
 	</bean>
 
 	<!-- notice that loading the Driver as a bean is unnecessary is most cases! 

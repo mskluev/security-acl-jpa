@@ -4,8 +4,9 @@
 	xmlns:security="http://www.springframework.org/schema/security"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
 	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
-	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
-		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.1.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
@@ -26,6 +27,9 @@
 		</constructor-arg>
 	</bean>
 
+	<bean id="auditLogger" 
+			class="org.springframework.security.acls.domain.ConsoleAuditLogger" />
+
 	<bean id="lookupStrategy"
 		class="org.springframework.security.acls.jdbc.BasicLookupStrategy">
 		<constructor-arg ref="datasource" />
@@ -41,8 +45,22 @@
 				</constructor-arg>
 			</bean>
 		</constructor-arg>
+		<constructor-arg ref="auditLogger"/>
+	</bean>
+	
+	<bean id="aclAuthorizationStrategy" class="org.springframework.security.acls.domain.AclAuthorizationStrategyImpl">
 		<constructor-arg>
-			<bean class="org.springframework.security.acls.domain.ConsoleAuditLogger" />
+			<list>
+				<bean class="org.springframework.security.core.authority.SimpleGrantedAuthority">
+					<constructor-arg value="ROLE_ADMINISTRATOR"/>
+				</bean>
+				<bean class="org.springframework.security.core.authority.SimpleGrantedAuthority">
+					<constructor-arg value="ROLE_ADMINISTRATOR"/>
+				</bean>
+				<bean class="org.springframework.security.core.authority.SimpleGrantedAuthority">
+					<constructor-arg value="ROLE_ADMINISTRATOR"/>
+				</bean>
+			</list>
 		</constructor-arg>
 	</bean>
 
@@ -77,6 +95,11 @@
 	<bean id="permissionEvaluator"
 		class="org.springframework.security.acls.AclPermissionEvaluator">
 		<constructor-arg ref="aclService" />
+	</bean>
+	
+	<bean id="permissionGrantingStrategy" 
+	class="org.springframework.security.acls.domain.DefaultPermissionGrantingStrategy">
+		<constructor-arg ref="auditLogger"/>
 	</bean>
 
 	<tx:advice id="aclTransactionAdvice" transaction-manager="aclTransactionManager">
