@@ -12,5 +12,6 @@
 	</root>
 
 	<logger name="org.springframework" level="INFO" />
+	<!-- <logger name="org.hibernate" level="all"/> -->
 
 </configuration>

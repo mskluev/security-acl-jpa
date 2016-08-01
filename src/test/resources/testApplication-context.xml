@@ -15,9 +15,9 @@
 	<import resource="classpath:security-config.xml" />
 
 	<context:component-scan
-		base-package="com.mediaiqdigital.spring.acl.jpa.expression,com.mediaiqdigital.spring.acl.jpa.test.service.impl,com.mediaiqdigital.spring.acl.jpa.test.acl.advice"></context:component-scan>
+		base-package="com.skogul.spring.jpaaclintegration"></context:component-scan>
 
-	<jpa:repositories base-package="com.mediaiqdigital.spring.acl.jpa.test.repo"
+	<jpa:repositories base-package="com.skogul.spring.jpaaclintegration.repository"
 		entity-manager-factory-ref="entityManagerFactory"
 		transaction-manager-ref="transactionManager" />
 
@@ -27,11 +27,11 @@
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="datasource" />
 		<property name="packagesToScan"
-			value="com.mediaiqdigital.spring.acl.jpa.test.domain,com.mediaiqdigital.spring.acl.jpa.domain" />
+			value="com.skogul.spring.jpaaclintegration.domain" />
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-				<property name="database" value="MYSQL" />
-				<property name="generateDdl" value="false" />
+				<property name="generateDdl" value="true" />
+				<property name="showSql" value="true" />
 			</bean>
 		</property>
 	</bean>
