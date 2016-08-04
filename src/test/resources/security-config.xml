@@ -26,12 +26,8 @@
 		class="com.skogul.spring.acl.AclPermissionEvaluator">
 		<constructor-arg ref="aclService" />
 	</bean>
-
-	<!-- <tx:advice id="aclTransactionAdvice" transaction-manager="aclTransactionManager"> 
-		<tx:attributes> <tx:method name="createAcl" /> <tx:method name="updateAcl" 
-		/> </tx:attributes> </tx:advice> <aop:aspectj-autoproxy /> <aop:config> <aop:pointcut 
-		id="aclServiceOperation" expression="execution(* org.springframework.security.acls.jdbc.JdbcMutableAclService.*(..))" 
-		/> <aop:advisor advice-ref="aclTransactionAdvice" pointcut-ref="aclServiceOperation" 
-		/> </aop:config> -->
+	
+	<bean id="permissionResolver"
+		class="com.skogul.spring.acl.domain.PermissionResolverImpl"/>
 
 </beans>

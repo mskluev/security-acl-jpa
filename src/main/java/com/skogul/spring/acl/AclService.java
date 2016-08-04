@@ -75,7 +75,7 @@ public class AclService {
 		for (AclEntry e : entries) {
 			p = p | e.getMask();
 		}
-		
+
 		return (p & permission) > 0;
 	}
 
@@ -122,6 +122,11 @@ public class AclService {
 					+ "' not found");
 		}
 
+		return addPermission(aclObjId, secId, perInteger);
+	}
+
+	public AclEntry addPermission(AclObjectIdentity aclObjId, SecurityIdentity secId,
+			Integer perInteger) {
 		// Get the sidObject
 		AclSid aclSid = createOrRetrieveSid(secId, true);
 

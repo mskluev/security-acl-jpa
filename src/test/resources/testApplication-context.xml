@@ -42,14 +42,14 @@
 
 	<!-- <aop:config proxy-target-class="true">
 		<aop:pointcut id="aclCreatePointcut"
-			expression="@annotation(com.mediaiqdigital.spring.acl.jpa.test.acl.advice.CreateAcl)" />
+			expression="@annotation(com.skogul.spring.acl.advice.CreateACL)" />
 		<aop:advisor pointcut-ref="aclCreatePointcut" advice-ref="aclCreateAdvice"
 			order="-1" />
 	</aop:config> -->
 	
 	<!-- <aop:config proxy-target-class="true">
 		<aop:pointcut id="aclCreatePointcut"
-			expression="@annotation(com.mediaiqdigital.spring.acl.jpa.test.acl.advice.CreateAcl)" />
+			expression="@annotation(com.skogul.spring.acl.advice.CreateACL)" />
 		<aop:advisor pointcut-ref="aclCreatePointcut" advice-ref="aclCreateAroundAdvice"
 			order="-1" />
 	</aop:config> -->
