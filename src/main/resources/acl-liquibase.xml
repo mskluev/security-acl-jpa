@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<!-- This file is not used by any of the classes or in the tests. It's just 
+		here for reference for people who may use liquibase. -->
+	<changeSet id="20160804145856-1" author="mskluev">
+		<comment>ACL - Sid Table</comment>
+		<createTable tableName="acl_sid">
+			<column name="id" type="bigint" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="sid" type="varchar(150)">
+				<constraints nullable="false" />
+			</column>
+			<column name="principal" type="boolean">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addUniqueConstraint constraintName="unique_acl_sid"
+			tableName="acl_sid" columnNames="sid, principal" />
+
+	</changeSet>
+
+	<changeSet id="20160804145856-2" author="mskluev">
+		<comment>ACL - Class Table</comment>
+		<createTable tableName="acl_class">
+			<column name="id" type="bigint" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="class" type="varchar(150)">
+				<constraints unique="true" nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="20160804145856-3" author="mskluev">
+		<comment>ACL - Object Identity Table</comment>
+		<createTable tableName="acl_object_identity">
+			<column name="id" type="bigint" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="object_id_class" type="bigint">
+				<constraints nullable="false" />
+			</column>
+			<column name="object_id_identity" type="bigint">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="20160804145856-4" author="mskluev">
+		<comment>ACL - Object Identity Constraints</comment>
+		<addUniqueConstraint constraintName="unique_acl_object_identity"
+			tableName="acl_object_identity" columnNames="object_id_class, object_id_identity" />
+		<addForeignKeyConstraint constraintName="fk_acl_oid_class"
+			baseTableName="acl_object_identity" baseColumnNames="object_id_class"
+			referencedTableName="acl_class" referencedColumnNames="id" />
+	</changeSet>
+
+	<changeSet id="20160804145856-5" author="mskluev">
+		<comment>ACL - Entry Table</comment>
+		<createTable tableName="acl_entry">
+			<column name="id" type="bigint" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="acl_object_identity" type="bigint">
+				<constraints nullable="false" />
+			</column>
+			<column name="sid" type="bigint">
+				<constraints nullable="false" />
+			</column>
+			<column name="mask" type="integer">
+				<constraints nullable="false" />
+			</column>
+			<column name="editable" type="boolean">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="20160804145856-6" author="mskluev">
+		<comment>ACL - Entry Constraints</comment>
+		<addForeignKeyConstraint constraintName="fk_acl_entry_oid"
+			baseTableName="acl_entry" baseColumnNames="acl_object_identity"
+			referencedTableName="acl_object_identity" referencedColumnNames="id" />
+		<addForeignKeyConstraint constraintName="fk_entry_sid"
+			baseTableName="acl_entry" baseColumnNames="sid" referencedTableName="acl_sid"
+			referencedColumnNames="id" />
+	</changeSet>
+
+</databaseChangeLog>
