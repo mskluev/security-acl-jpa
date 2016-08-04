@@ -22,8 +22,6 @@
 		<constructor-arg value="-web,-webAllowOthers,-webPort,8082" />
 	</bean>
 
-	<!-- notice that loading the Driver as a bean is unnecessary is most cases! 
-		u could safely remove this and the depends-on in the next bean -->
 
 	<bean id="H2DatabaseJDBCDriver" class="org.h2.Driver" scope="singleton"
 		init-method="load" depends-on="org.h2.tools.Server" />

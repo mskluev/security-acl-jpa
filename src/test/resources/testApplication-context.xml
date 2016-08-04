@@ -15,9 +15,9 @@
 	<import resource="classpath:security-config.xml" />
 
 	<context:component-scan
-		base-package="com.skogul.spring.jpaaclintegration"></context:component-scan>
+		base-package="com.skogul.spring.acl"></context:component-scan>
 
-	<jpa:repositories base-package="com.skogul.spring.jpaaclintegration.repository"
+	<jpa:repositories base-package="com.skogul.spring.acl.repository"
 		entity-manager-factory-ref="entityManagerFactory"
 		transaction-manager-ref="transactionManager" />
 
@@ -27,7 +27,7 @@
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="datasource" />
 		<property name="packagesToScan"
-			value="com.skogul.spring.jpaaclintegration.domain" />
+			value="com.skogul.spring.acl.domain" />
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
 				<property name="generateDdl" value="true" />
@@ -39,7 +39,6 @@
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
 	</bean>
-
 
 	<!-- <aop:config proxy-target-class="true">
 		<aop:pointcut id="aclCreatePointcut"

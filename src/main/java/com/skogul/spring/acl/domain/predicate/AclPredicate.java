@@ -1,4 +1,4 @@
-package com.skogul.spring.jpaaclintegration.domain.predicate;
+package com.skogul.spring.acl.domain.predicate;
 
 import java.util.List;
 
@@ -8,16 +8,16 @@ import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.JPAExpressions;
-import com.skogul.spring.jpaaclintegration.domain.AclClass;
-import com.skogul.spring.jpaaclintegration.domain.AclObjectIdentity;
-import com.skogul.spring.jpaaclintegration.domain.AclSid;
-import com.skogul.spring.jpaaclintegration.domain.QAclClass;
-import com.skogul.spring.jpaaclintegration.domain.QAclEntry;
-import com.skogul.spring.jpaaclintegration.domain.QAclObjectIdentity;
-import com.skogul.spring.jpaaclintegration.domain.QAclSid;
+import com.skogul.spring.acl.domain.jpa.AclClass;
+import com.skogul.spring.acl.domain.jpa.AclObjectIdentity;
+import com.skogul.spring.acl.domain.jpa.AclSid;
+import com.skogul.spring.acl.domain.jpa.QAclClass;
+import com.skogul.spring.acl.domain.jpa.QAclEntry;
+import com.skogul.spring.acl.domain.jpa.QAclObjectIdentity;
+import com.skogul.spring.acl.domain.jpa.QAclSid;
 
 public abstract class AclPredicate<T, Q extends EntityPathBase<T>> {
-	
+
 	protected abstract Class<T> getType();
 
 	protected abstract NumberPath<Long> getObjectId();
@@ -25,7 +25,7 @@ public abstract class AclPredicate<T, Q extends EntityPathBase<T>> {
 	protected abstract Q getInnerObject();
 
 	protected abstract NumberPath<Long> getInnerObjectId();
-	
+
 	private SubQueryExpression<AclSid> selectAclSidSubQuery(List<String> sids) {
 		QAclSid aclSid = QAclSid.aclSid;
 		return JPAExpressions.selectFrom(aclSid).where(aclSid.sid.in(sids));
@@ -33,14 +33,15 @@ public abstract class AclPredicate<T, Q extends EntityPathBase<T>> {
 
 	private SubQueryExpression<AclClass> selectAclClassSubQuery() {
 		QAclClass aclClass = QAclClass.aclClass;
-		return JPAExpressions.selectDistinct(aclClass).from(aclClass).where(
-				aclClass.className.eq(getType().getName()));
+		return JPAExpressions.selectDistinct(aclClass).from(aclClass)
+				.where(aclClass.className.eq(getType().getName()));
 	}
 
 	private SubQueryExpression<AclObjectIdentity> selectAclObjectIdentity(
 			NumberPath<Long> id) {
 		QAclObjectIdentity objectIdentity = QAclObjectIdentity.aclObjectIdentity;
-		return JPAExpressions.selectDistinct(objectIdentity)
+		return JPAExpressions
+				.selectDistinct(objectIdentity)
 				.from(objectIdentity)
 				.where(objectIdentity.objectIdIdentity.eq(id).and(
 						objectIdentity.objectIdClass
@@ -50,11 +51,12 @@ public abstract class AclPredicate<T, Q extends EntityPathBase<T>> {
 	private BooleanExpression selectCountOfAclEntry(NumberPath<Long> id,
 			List<String> sids) {
 		QAclEntry aclEntry = QAclEntry.aclEntry;
-		return JPAExpressions.select(Wildcard.count).from(aclEntry)
+		return JPAExpressions
+				.select(Wildcard.count)
+				.from(aclEntry)
 				.where(aclEntry.aclObjectIdentity.eq(
 						selectAclObjectIdentity(id)).and(
-						aclEntry.granting.eq(true).and(
-								aclEntry.sid.in(selectAclSidSubQuery(sids))))).gt(0L);
+						aclEntry.sid.in(selectAclSidSubQuery(sids)))).gt(0L);
 	}
 
 	private SubQueryExpression<Long> selectWhereSomeObjectHasAnAclEntry(
@@ -63,7 +65,7 @@ public abstract class AclPredicate<T, Q extends EntityPathBase<T>> {
 		return JPAExpressions.select(getInnerObjectId()).from(getInnerObject())
 				.where(selectCountOfAclEntry(id, sids));
 	}
-	
+
 	/**
 	 * Returns a predicate defining a query from {@code SomeObject} which
 	 * performs the necessary check to ensure that the user has privileges to

@@ -1,4 +1,4 @@
-package com.skogul.spring.jpaaclintegration.domain;
+package com.skogul.spring.acl.domain.jpa;
 
 import java.io.Serializable;
 
@@ -9,13 +9,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Immutable;
-import org.springframework.security.acls.model.Sid;
-
 @Entity(name = "AclSid")
 @Table(name = "acl_sid")
-@Immutable
-public class AclSid implements Sid, Serializable {
+public class AclSid implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

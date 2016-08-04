@@ -15,107 +15,23 @@
 		<security:expression-handler ref="expressionHandler" />
 	</security:global-method-security>
 
-	<bean id="aclCache"
-		class="org.springframework.security.acls.domain.EhCacheBasedAclCache">
-		<constructor-arg>
-			<bean class="org.springframework.cache.ehcache.EhCacheFactoryBean">
-				<property name="cacheManager">
-					<bean class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" />
-				</property>
-				<property name="cacheName" value="aclCache" />
-			</bean>
-		</constructor-arg>
-	</bean>
-
-	<bean id="auditLogger" 
-			class="org.springframework.security.acls.domain.ConsoleAuditLogger" />
-
-	<bean id="lookupStrategy"
-		class="org.springframework.security.acls.jdbc.BasicLookupStrategy">
-		<constructor-arg ref="datasource" />
-		<constructor-arg ref="aclCache" />
-		<constructor-arg>
-			<bean
-				class="org.springframework.security.acls.domain.AclAuthorizationStrategyImpl">
-				<constructor-arg>
-					<bean
-						class="org.springframework.security.core.authority.SimpleGrantedAuthority">
-						<constructor-arg value="ROLE_ADMINISTRATOR" />
-					</bean>
-				</constructor-arg>
-			</bean>
-		</constructor-arg>
-		<constructor-arg ref="auditLogger"/>
-	</bean>
-	
-	<bean id="aclAuthorizationStrategy" class="org.springframework.security.acls.domain.AclAuthorizationStrategyImpl">
-		<constructor-arg>
-			<list>
-				<bean class="org.springframework.security.core.authority.SimpleGrantedAuthority">
-					<constructor-arg value="ROLE_ADMINISTRATOR"/>
-				</bean>
-				<bean class="org.springframework.security.core.authority.SimpleGrantedAuthority">
-					<constructor-arg value="ROLE_ADMINISTRATOR"/>
-				</bean>
-				<bean class="org.springframework.security.core.authority.SimpleGrantedAuthority">
-					<constructor-arg value="ROLE_ADMINISTRATOR"/>
-				</bean>
-			</list>
-		</constructor-arg>
-	</bean>
-
-	<bean id="aclTransactionManager"
-		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource" ref="datasource" />
-	</bean>
-
-	<bean id="aclService"
-		class="org.springframework.security.acls.jdbc.JdbcMutableAclService">
-		<constructor-arg ref="datasource" />
-		<constructor-arg ref="lookupStrategy" />
-		<constructor-arg ref="aclCache" />
-		<property name="classIdentityQuery" value="SELECT @@IDENTITY"/>
-		<property name="sidIdentityQuery" value="SELECT @@IDENTITY"/>
-	</bean>
-
-	<!-- Automatically receives AuthenticationEvent messages -->
-	<bean id="loggerListener"
-		class="org.springframework.security.authentication.event.LoggerListener" />
+	<bean id="aclService" class="com.skogul.spring.acl.AclService" />
 
 	<bean id="expressionHandler"
 		class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler">
 		<property name="permissionEvaluator" ref="permissionEvaluator" />
-		<property name="permissionCacheOptimizer">
-			<bean class="org.springframework.security.acls.AclPermissionCacheOptimizer">
-				<constructor-arg ref="aclService" />
-			</bean>
-		</property>
 	</bean>
 
 	<bean id="permissionEvaluator"
-		class="org.springframework.security.acls.AclPermissionEvaluator">
+		class="com.skogul.spring.acl.AclPermissionEvaluator">
 		<constructor-arg ref="aclService" />
 	</bean>
-	
-	<bean id="permissionGrantingStrategy" 
-	class="org.springframework.security.acls.domain.DefaultPermissionGrantingStrategy">
-		<constructor-arg ref="auditLogger"/>
-	</bean>
 
-	<tx:advice id="aclTransactionAdvice" transaction-manager="aclTransactionManager">
-		<tx:attributes>
-			<tx:method name="createAcl" />
-			<tx:method name="updateAcl" />
-		</tx:attributes>
-	</tx:advice>
-
-	<aop:aspectj-autoproxy />
-	
-	<aop:config>
-		<aop:pointcut id="aclServiceOperation"
-			expression="execution(* org.springframework.security.acls.jdbc.JdbcMutableAclService.*(..))" />
-		<aop:advisor advice-ref="aclTransactionAdvice"
-			pointcut-ref="aclServiceOperation" />
-	</aop:config>
+	<!-- <tx:advice id="aclTransactionAdvice" transaction-manager="aclTransactionManager"> 
+		<tx:attributes> <tx:method name="createAcl" /> <tx:method name="updateAcl" 
+		/> </tx:attributes> </tx:advice> <aop:aspectj-autoproxy /> <aop:config> <aop:pointcut 
+		id="aclServiceOperation" expression="execution(* org.springframework.security.acls.jdbc.JdbcMutableAclService.*(..))" 
+		/> <aop:advisor advice-ref="aclTransactionAdvice" pointcut-ref="aclServiceOperation" 
+		/> </aop:config> -->
 
 </beans>

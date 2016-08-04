@@ -1,4 +1,4 @@
-package com.skogul.spring.jpaaclintegration.domain;
+package com.skogul.spring.acl.model;
 
 public interface SecurityIdentity {
 
