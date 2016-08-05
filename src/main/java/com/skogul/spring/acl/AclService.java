@@ -4,7 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.util.Assert;
 
 import com.skogul.spring.acl.domain.jpa.AclClass;
@@ -32,13 +33,13 @@ import com.skogul.spring.acl.repository.AclSidRepository;
  */
 public class AclService {
 
-	@Autowired
+	@Inject
 	protected AclObjectIdentityRepository objIdRepo;
-	@Autowired
+	@Inject
 	protected AclClassRepository classRepo;
-	@Autowired
+	@Inject
 	protected AclEntryRepository entryRepo;
-	@Autowired
+	@Inject
 	protected AclSidRepository sidRepo;
 
 	public AclService() {

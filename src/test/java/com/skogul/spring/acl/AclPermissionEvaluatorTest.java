@@ -3,20 +3,18 @@ package com.skogul.spring.acl;
 import static org.assertj.core.api.StrictAssertions.assertThat;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 
 import junit.framework.TestCase;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.skogul.spring.acl.AclPermissionEvaluator;
-import com.skogul.spring.acl.AclService;
 import com.skogul.spring.acl.domain.ObjectIdentityImpl;
 import com.skogul.spring.acl.domain.SecurityIdentityImpl;
 import com.skogul.spring.acl.model.ObjectIdentity;
@@ -39,11 +37,11 @@ public class AclPermissionEvaluatorTest extends TestCase {
 	private static final String TEST_SID_STRING = "admin";
 	private static final Integer TEST_PERMISSION_MASK = 1;
 
-	@Autowired
+	@Inject
 	public AclService aclService;
-	@Autowired
+	@Inject
 	public AclObjectIdentityRepository objIdRepo;
-	@Autowired
+	@Inject
 	public AclEntryRepository entryRepo;
 
 	private AclPermissionEvaluator evaluator;

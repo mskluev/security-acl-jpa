@@ -1,10 +1,11 @@
 package com.skogul.spring.acl.advice;
 
+import javax.inject.Inject;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.skogul.spring.acl.AclService;
@@ -19,9 +20,9 @@ import com.skogul.spring.acl.model.PermissionResolver;
 @Component
 public class ACLAroundAdvice {
 
-	@Autowired
+	@Inject
 	protected AclService aclService;
-	@Autowired
+	@Inject
 	protected PermissionResolver permResolver;
 
 	@Around("@annotation(com.skogul.spring.acl.advice.CreateACL) && @annotation(createACL)")
