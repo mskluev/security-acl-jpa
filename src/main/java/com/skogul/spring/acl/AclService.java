@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import com.skogul.spring.acl.domain.jpa.AclClass;
@@ -42,8 +43,13 @@ public class AclService {
 	@Inject
 	protected AclSidRepository sidRepo;
 
-	public AclService() {
+	private boolean doNotFoundchecks = false;
 
+	public AclService() {
+	}
+
+	public AclService(boolean doNotFoundchecks) {
+		this.doNotFoundchecks = doNotFoundchecks;
 	}
 
 	/**
@@ -62,11 +68,21 @@ public class AclService {
 	 *            READ+WRITE)
 	 * @return
 	 */
+	@Transactional(readOnly = true)
 	public boolean hasPermission(ObjectIdentity objId,
 			List<SecurityIdentity> sids, Integer permission) {
 
 		List<String> sidStrings = sids.stream().map(s -> s.getSidString())
 				.collect(Collectors.toCollection(LinkedList::new));
+
+		// Does it exist? This is only necessary if we want to throw a 404 error
+		// otherwise it is a wasted database call
+		if (doNotFoundchecks) {
+			AclObjectIdentity acl = findACL(objId);
+			if (acl == null) {
+				throw new NotFoundException("Object not found");
+			}
+		}
 
 		List<AclEntry> entries = entryRepo.findEntriesForSidsOnObject(
 				objId.getIdentifier(), objId.getType(), sidStrings);
@@ -80,12 +96,14 @@ public class AclService {
 		return (p & permission) > 0;
 	}
 
+	@Transactional(readOnly = true)
 	public AclObjectIdentity findACL(ObjectIdentity objId) {
 		Assert.notNull(objId, "ObjectIdentity required");
 
 		return findAclObject(objId);
 	}
 
+	@Transactional
 	public AclObjectIdentity createACL(ObjectIdentity objId) {
 		Assert.notNull(objId, "ObjectIdentity required");
 
@@ -98,6 +116,7 @@ public class AclService {
 		return createObjectIdentity(objId);
 	}
 
+	@Transactional
 	public void deleteACL(ObjectIdentity objId) {
 		Assert.notNull(objId, "ObjectIdentity required");
 
@@ -113,6 +132,12 @@ public class AclService {
 		objIdRepo.delete(aclObjId.getId());
 	}
 
+	@Transactional(readOnly = true)
+	public List<AclEntry> getPermissions(ObjectIdentity objId) {
+		return findACL(objId).getAclEntries();
+	}
+
+	@Transactional
 	public AclEntry addPermission(ObjectIdentity objId, SecurityIdentity secId,
 			Integer perInteger) {
 		// Does a corresponding AclObjectIdentity exist?
@@ -126,8 +151,9 @@ public class AclService {
 		return addPermission(aclObjId, secId, perInteger);
 	}
 
-	public AclEntry addPermission(AclObjectIdentity aclObjId, SecurityIdentity secId,
-			Integer perInteger) {
+	@Transactional
+	public AclEntry addPermission(AclObjectIdentity aclObjId,
+			SecurityIdentity secId, Integer perInteger) {
 		// Get the sidObject
 		AclSid aclSid = createOrRetrieveSid(secId, true);
 
@@ -136,15 +162,8 @@ public class AclService {
 				aclObjId, aclSid);
 		// If not, create one
 		if (aclEntry == null) {
-			aclEntry = new AclEntry();
-			aclEntry.setAclObjectIdentity(aclObjId);
-			aclEntry.setSid(aclSid);
-			aclEntry.setEditable(true); // TODO
-			aclEntry.setMask(perInteger);
-			aclEntry = entryRepo.save(aclEntry);
-			// Add it to the parent container
-			aclObjId.getAclEntries().add(aclEntry);
-			return aclEntry;
+			// TODO editable should not always be true
+			return createPermissionEntry(aclObjId, aclSid, true, perInteger);
 		}
 
 		// Check permission
@@ -153,12 +172,13 @@ public class AclService {
 			return aclEntry;
 		}
 		// Add permission
-		aclEntry.setMask(aclEntry.getMask() + perInteger);
+		aclEntry.setMask(aclEntry.getMask() | perInteger);
 
 		// Save & return
 		return entryRepo.save(aclEntry);
 	}
 
+	@Transactional
 	public AclEntry removePermission(ObjectIdentity objId,
 			SecurityIdentity secId, Integer perInteger) {
 		// Does an entry exist?
@@ -178,7 +198,36 @@ public class AclService {
 			// Sid doesn't have permission, we're done here
 			return aclEntry;
 		} // Remove permission
-		aclEntry.setMask(aclEntry.getMask() - perInteger);
+		aclEntry.setMask(aclEntry.getMask() ^ perInteger);
+
+		// Save & return
+		return entryRepo.save(aclEntry);
+	}
+
+	@Transactional
+	public AclEntry setPermission(ObjectIdentity objId, SecurityIdentity secId,
+			Integer perInteger) {
+		// Does a corresponding AclObjectIdentity exist?
+		AclObjectIdentity aclObjId = findAclObject(objId);
+		// If not, throw error? Could create it...
+		if (aclObjId == null) {
+			throw new NotFoundException("Object identity '" + objId
+					+ "' not found");
+		}
+
+		// Get the sidObject
+		AclSid aclSid = createOrRetrieveSid(secId, true);
+
+		// Does an AclEntry already exist?
+		AclEntry aclEntry = entryRepo.findOneByAclObjectIdentityAndSid(
+				aclObjId, aclSid);
+		// If not, create it
+		if (aclEntry == null) {
+			// TODO editable should not always default to true
+			return createPermissionEntry(aclObjId, aclSid, true, perInteger);
+		}
+
+		aclEntry.setMask(perInteger);
 
 		// Save & return
 		return entryRepo.save(aclEntry);
@@ -240,5 +289,18 @@ public class AclService {
 		}
 
 		return aclSid;
+	}
+
+	protected AclEntry createPermissionEntry(AclObjectIdentity objId,
+			AclSid sid, boolean editable, Integer permission) {
+		AclEntry aclEntry = new AclEntry();
+		aclEntry.setAclObjectIdentity(objId);
+		aclEntry.setSid(sid);
+		aclEntry.setEditable(editable);
+		aclEntry.setMask(permission);
+		aclEntry = entryRepo.save(aclEntry);
+		// Add it to the parent container
+		//objId.getAclEntries().add(aclEntry);
+		return aclEntry;
 	}
 }

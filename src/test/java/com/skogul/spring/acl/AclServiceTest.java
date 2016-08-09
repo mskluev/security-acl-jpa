@@ -108,11 +108,6 @@ public class AclServiceTest extends TestCase {
 		assertThat(entry.getSid().getSid()).isEqualTo(TEST_SID_STRING);
 		assertThat(entry.getEditable()).isTrue();
 		assertThat(entry.getMask()).isEqualTo(TEST_PERMISSION_MASK);
-
-		// Check container
-		acl = objIdRepo.findOne(acl.getId());
-		assertThat(acl.getAclEntries()).isNotNull();
-		assertThat(acl.getAclEntries().size()).isEqualTo(1);
 	}
 
 	@Test
